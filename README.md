@@ -28,13 +28,13 @@ Target | Argument | Targeted Group | Hateful [END]
 - 训练方式：LoRA SFT
 - 训练框架：ms-swift
 - 主要目标：生成符合比赛格式的仇恨言论四元组
-- 本地记录最佳公开分数：`0.3566`，对应 `glm-4-9b-0414 v1`
+- 实验记录最佳公开分数：`0.3566`，对应 `glm-4-9b-0414 v1`
 
-### 当前仓库能复现到什么程度
+### 复现范围
 
-当前仓库支持复现完整训练和推理流程，但不直接提交比赛原始数据、转换后的 JSONL、提交文件、checkpoint 或 LoRA 权重。因此它是一个合规的复现脚手架，而不是“下载后直接跑出同分数”的完整包。
+本仓库支持复现完整训练和推理流程，但不直接提交比赛原始数据、转换后的 JSONL、提交文件、checkpoint 或 LoRA 权重。因此它是一个合规的复现脚手架，而不是“克隆后直接跑出同分数”的完整包。
 
-复现者还需要自行准备：
+复现实验需要准备：
 
 - `data/train.json`：官方训练集
 - `data/test1.json`：官方测试输入，可用于初赛或格式检查
@@ -44,7 +44,7 @@ Target | Argument | Targeted Group | Hateful [END]
 - 足够显存的 GPU 资源
 - 如果不重新训练、只想直接推理，还需要最终 LoRA adapter/checkpoint
 
-你的本地目录中已经有 `train.json`、`test1.json`、`test2.json`。这些文件没有提交到 GitHub，是为了避免二次公开分发比赛数据。
+比赛数据文件未纳入本仓库，以避免二次公开分发比赛数据。复现时请按比赛规则从官方渠道获取数据，并放入 `data/` 目录。
 
 ### 仓库结构
 
@@ -144,7 +144,7 @@ python scripts/export_submission.py \
   --output-txt output/predict_result.txt
 ```
 
-### 不建议上传的内容
+### 未纳入仓库的内容
 
 - 官方原始数据与派生 JSONL
 - 最终提交文件
@@ -153,11 +153,11 @@ python scripts/export_submission.py \
 
 ### 隐私与数据说明
 
-当前主干不包含密钥、Token、本地绝对路径、服务器连接配置、原始数据、派生 JSONL、预测提交文件或大权重。
+当前发布版本不包含密钥、Token、本地绝对路径、服务器连接配置、原始数据、派生 JSONL、预测提交文件或大权重。
 
-需要注意：仓库中的论文 PDF 保留了论文署名信息，包括作者姓名、学校学院和联系邮箱。如果你希望项目完全匿名，应替换为匿名版 PDF 或删除该 PDF。
+需要注意：仓库中的论文 PDF 保留了论文署名信息，包括作者姓名、学校学院和联系邮箱。如需完全匿名发布，应替换为匿名版 PDF 或删除该 PDF。
 
-另外，旧版 zip 虽已从当前主干删除，但仍可能存在于 Git 历史中。若需要从公开历史中彻底移除，需要单独执行历史清理并强推。
+另外，旧版 zip 虽已从当前发布版本删除，但仍可能存在于 Git 历史中。若需要从公开历史中彻底移除，需要单独执行历史清理并强推。
 
 ### License
 
@@ -203,13 +203,13 @@ Example:
 - Training method: LoRA SFT
 - Training framework: ms-swift
 - Main goal: generate hate-speech quadruples that follow the competition format
-- Local best recorded public score: `0.3566`, corresponding to `glm-4-9b-0414 v1`
+- Recorded best public score: `0.3566`, corresponding to `glm-4-9b-0414 v1`
 
-### Reproduction Status
+### Reproduction Scope
 
 This repository supports the full training and inference workflow, but it does not directly commit the original competition data, converted JSONL files, submission files, checkpoints, or LoRA weights. It is therefore a compliant reproduction scaffold, not a complete package that can reproduce the same score immediately after cloning.
 
-To reproduce the work, users still need to prepare:
+Reproduction requires:
 
 - `data/train.json`: official training set
 - `data/test1.json`: official test input, useful for preliminary evaluation or format checks
@@ -219,7 +219,7 @@ To reproduce the work, users still need to prepare:
 - GPU resources with enough VRAM
 - The final LoRA adapter/checkpoint if they want inference only without retraining
 
-Your local directories already contain `train.json`, `test1.json`, and `test2.json`. These files are not committed to GitHub to avoid redistributing competition data.
+The competition data files are excluded from this repository to avoid redistributing the dataset. For reproduction, obtain the data from the official competition channel and place it under `data/`.
 
 ### Repository Structure
 
@@ -275,7 +275,7 @@ Hardware reference recorded in the paper and this repository:
 - CPU: 24 cores
 - RAM: 64GB
 
-If GLM-4-9B-0414 has already been deployed or mounted in a cloud service, you do not need to download the model into this repository. Set `MODEL_PATH` or `ADAPTER_PATH` to the corresponding path in the cloud environment during training or inference.
+If GLM-4-9B-0414 has already been deployed or mounted in a cloud service, the model does not need to be stored in this repository. During training or inference, set `MODEL_PATH` or `ADAPTER_PATH` to the corresponding path in the cloud environment.
 
 ### Reproduction Workflow
 
@@ -319,7 +319,7 @@ python scripts/export_submission.py \
   --output-txt output/predict_result.txt
 ```
 
-### Content Not Recommended for Upload
+### Excluded Content
 
 - Official raw data and derived JSONL files
 - Final submission files
@@ -328,11 +328,11 @@ python scripts/export_submission.py \
 
 ### Privacy and Data Notes
 
-The current main branch does not contain secrets, tokens, local absolute paths, server connection configs, original data, derived JSONL files, prediction submission files, or large weights.
+The current release does not contain secrets, tokens, local absolute paths, server connection configs, original data, derived JSONL files, prediction submission files, or large weights.
 
 Note: the paper PDF in this repository keeps the paper byline information, including author names, school/college, and contact email. If the project needs to be fully anonymous, replace it with an anonymized PDF or remove the PDF.
 
-Also, the old zip file has been removed from the current main branch, but it may still exist in Git history. Removing it from public history requires a separate history rewrite and force push.
+Also, the old zip file has been removed from the current release, but it may still exist in Git history. Removing it from public history requires a separate history rewrite and force push.
 
 ### License
 
