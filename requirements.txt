@@ -1,0 +1,7 @@
+torch==2.2.2
+transformers
+datasets
+ms-swift
+deepspeed
+accelerate
+safetensors

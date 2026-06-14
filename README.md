@@ -1,78 +1,123 @@
-# 中文仇恨言论检测项目
-本项目基于GLM-4-9B大模型实现细粒度片段级中文仇恨言论识别，能够从社交媒体文本中提取结构化仇恨四元组（评论对象、论点、目标群体、是否仇恨）。
+# GLM-4-9B-LoRA-HateSpeech
 
-## 项目背景
-随着社交媒体的普及，仇恨言论的传播已成为严重社会问题。本项目针对细粒度片段级中文仇恨言论识别任务，基于[GLM-4-9B-0414](https://www.modelscope.cn/models/ZhipuAI/GLM-4-9B-0414)大模型进行微调，实现对文本中仇恨四元组的精准识别。
+基于 GLM-4-9B-0414 与 LoRA 微调的细粒度中文仇恨言论四元组抽取方案。本项目用于 CCL25-Eval Task 10 / 天池「细粒度中文仇恨识别评测」参赛方案复现与技术说明。
 
-## 任务描述
-**输入**：社交媒体文本  
-**输出**：仇恨四元组（顺序：`评论对象 | 论点 | 目标群体 | 是否仇恨`）  
-- 多个四元组用 `[SEP]` 分隔
-- 每个四元组以 `[END]` 结尾
-- **格式示例**：
-  ```text
-  评论对象A | 论点A | 目标群体A | hate [END] [SEP] 评论对象B | 论点B | 目标群体B | non-hate [END]
+## 任务简介
 
-环境要求:
-硬件配置
-GPU：2× NVIDIA GPU（每卡24GB显存）
-CPU：24核
-内存：64GB
+输入为社交媒体评论文本，输出为一个或多个仇恨言论四元组：
 
+```text
+Target | Argument | Targeted Group | Hateful [END]
+```
 
-## 软件依赖:
-PyTorch == 2.2.2
-pip install ms-swift transformers
+多四元组样本使用 `[SEP]` 分隔。示例：
 
-数据集:
-训练集：train.json
-测试集：test1.json, test2.json
+```text
+老黑 | 讨厌 | Racism | hate [SEP] 媚黑的 | 倒贴 | Racism | hate [END]
+```
 
-数据集格式：
-{
-    "id": "样本唯一ID",
-    "content": "原始文本内容",
-    "output": "评论对象 | 论点 | 目标群体 | 是否仇恨 [END]"
-}
+## 方法概览
 
-使用流程
-1. 数据预处理
-将JSON格式转换为JSONL格式：
-python3 change.py
+- 基座模型：[GLM-4-9B-0414](https://www.modelscope.cn/models/ZhipuAI/GLM-4-9B-0414)
+- 训练方式：LoRA SFT
+- 训练框架：ms-swift
+- 主要目标：将评论文本生成规范化四元组，兼顾硬匹配与软匹配 F1
+- 本地记录最佳公开分数：`0.3566`，对应 `glm-4-9b-0414 v1`
 
-2. 模型微调
-运行微调脚本：sh sft.sh
+## 仓库内容
 
-3. 模型训练
-根据微调后的检查点继续训练：
-sh train.sh
+```text
+.
+├── assets/training_curves/        # 训练曲线截图
+├── configs/                       # 训练参数与 DeepSpeed 配置
+├── data/README.md                 # 官方数据获取与放置说明
+├── docs/experiment_scores.md      # 实验分数记录
+├── scripts/prepare_data.py        # 官方 JSON 转 ms-swift JSONL
+├── scripts/train_lora.sh          # LoRA 训练脚本
+├── scripts/infer.sh               # 推理脚本
+├── scripts/export_submission.py   # JSONL 预测结果转提交 txt
+├── DATA_NOTICE.md                 # 数据版权与使用说明
+├── MODEL_CARD.md                  # 模型用途、限制与风险说明
+├── requirements.txt
+└── 基于GLM_4_9B_LoRA的细粒度中文仇恨言论识别.pdf
+```
 
-4. 生成预测结果：
-python3 submit.py
+## 数据准备
 
-# 项目结构
+本仓库不再分发比赛原始数据或由原始数据转换出的训练/测试 JSONL。请按比赛规则从官方渠道获取数据，并放置为：
 
-- data/                   # 原始数据集
-  - train.json
-  - test1.json
-  - test2.json
-- scripts/                # 执行脚本
-  - sft.sh              # 微调脚本
-  - train.sh            # 训练脚本
-- utils/                  # 工具脚本
-  - change.py           # 数据格式转换
-  - submit.py           # 结果提交转换
-- output/                 # 输出目录
-  - checkpoint-xxx/     # 模型检查点
-  - sft_data.jsonl      # 微调训练数据
-  - test_data.jsonl     # 测试集数据
-- README.md
+```text
+data/train.json
+data/test2.json
+```
+
+详见 [data/README.md](data/README.md) 与 [DATA_NOTICE.md](DATA_NOTICE.md)。
+
+## 环境安装
+
+建议使用 Python 3.10+ 与 CUDA 环境。
+
+```bash
+pip install -r requirements.txt
+```
+
+硬件参考配置：
+
+- GPU：2 x NVIDIA GPU，每卡 24GB 显存
+- CPU：24 核
+- 内存：64GB
+
+## 复现流程
+
+1. 生成 ms-swift 训练数据：
+
+```bash
+python scripts/prepare_data.py \
+  --train-json data/train.json \
+  --test-json data/test2.json \
+  --output-dir output
+```
+
+2. 训练 LoRA：
+
+```bash
+bash scripts/train_lora.sh
+```
+
+可通过环境变量覆盖默认参数：
+
+```bash
+MODEL_PATH=ZhipuAI/GLM-4-9B-0414 \
+TRAIN_DATA=output/sft_data.jsonl \
+OUTPUT_DIR=output/glm_4_9b_lora \
+bash scripts/train_lora.sh
+```
+
+3. 推理：
+
+```bash
+ADAPTER_PATH=output/glm_4_9b_lora/v1-xxxx/checkpoint-xxxx \
+TEST_DATA=output/test_data.jsonl \
+bash scripts/infer.sh
+```
+
+4. 导出提交文件：
+
+```bash
+python scripts/export_submission.py \
+  --predict-jsonl output/predict_result.jsonl \
+  --output-txt output/predict_result.txt
+```
+
 ## 比赛信息
-竞赛名称：细粒度片段级中文仇恨言论识别
 
-竞赛地址：天池竞赛平台https://tianchi.aliyun.com/competition/entrance/532298/information
+- 竞赛名称：细粒度片段级中文仇恨言论识别
+- 竞赛地址：[天池竞赛平台](https://tianchi.aliyun.com/competition/entrance/532298/information)
+- 官方仓库：[DUTIR-Emotion-Group/CCL2025-Chinese-Hate-Speech-Detection](https://github.com/DUTIR-Emotion-Group/CCL2025-Chinese-Hate-Speech-Detection)
 
-任务目标：构建结构化仇恨言论四元组，增强模型在细粒度场景下的检测能力和决策可解释性
+## 说明
+
+本项目包含有害文本检测相关内容，仅用于科研与比赛复现。模型输出可能存在偏见、漏检、误检或格式错误，不应直接用于线上自动化执法、内容处罚或高风险决策。
 
 
 

@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.vscode/
+
+# Local data from the competition organizers.
+data/*.json
+data/*.jsonl
+output/
+checkpoint*/
+checkpoints/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.tar
+*.tar.gz
+
+# Generated predictions and spreadsheets.
+*.jsonl
+*.xlsx
+*.opju
+
+# Local documents and office temp files.
+~$*.docx
+~$*.pptx
+*.xsh
